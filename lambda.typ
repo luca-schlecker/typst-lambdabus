@@ -43,25 +43,11 @@
 }
 
 #let lambda-parse-parenthesis(input: array, parse-expr: function) = {
-  let open-brackets = 0
-  let end = none
-  for (index, value) in input.enumerate() {
-    if value == "(" {
-      open-brackets += 1
-    } else if value == ")" {
-      open-brackets -= 1
-    }
+  if input.first() != "(" or input.last() != ")" {
+    panic("Not a valid λ-Calculus expression (wrong parenthesis placement): '" + input.join() + "'")
+  }
 
-    if open-brackets == 0 {
-      end = index
-    }
-  }
-  
-  if end == none {
-    panic("Not a valid λ-Calculus expression (missing closing parenthesis): '" + input.join() + "'")
-  } else {
-    return parse-expr(input.slice(1, end))
-  }
+  return parse-expr(input.slice(1, -1))
 }
 
 #let lambda-find-application-space(input: array) = {
