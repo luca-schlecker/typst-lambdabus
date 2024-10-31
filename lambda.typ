@@ -122,6 +122,16 @@
   }
 }
 
+#let lambda-free-vars(expr) = {
+  if expr.type == "value" {
+    return (expr.name,)
+  } else if expr.type == "application" {
+    return (lambda-free-vars(expr.fn) + lambda-free-vars(expr.param)).dedup()
+  } else if expr.type == "abstraction" {
+    return lambda-free-vars(expr.body).filter(it => it != expr.param)
+  }
+}
+
 #let lambda-display-expr(expr) = {
   if expr.type == "value" {
     expr.name
