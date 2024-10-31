@@ -121,3 +121,24 @@
     panic("Only an array of strings and a string can be parsed as a λ-Calculus expression")
   }
 }
+
+#let lambda-display-expr(expr) = {
+  if expr.type == "value" {
+    expr.name
+  } else if expr.type == "application" {
+    let left = if expr.fn.type == "abstraction" {
+      [(] + lambda-display-expr(expr.fn) + [)]
+    } else {
+      lambda-display-expr(expr.fn)
+    }
+    let right = if expr.param.type in ("application", "abstraction") {
+      [(] + lambda-display-expr(expr.param) + [)]
+    } else {
+      lambda-display-expr(expr.param)
+    }
+    
+    [#left #right]
+  } else if expr.type == "abstraction" {
+    [λ] + expr.param + [.] + lambda-display-expr(expr.body)
+  }
+}

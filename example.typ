@@ -1,3 +1,7 @@
-#import "lambda.typ": lambda-parse-expr
+#import "lambda.typ": *
 
-#lambda-parse-expr("λx.(y z)")
+#let parsed = lambda-parse-expr("λx.(y z)")
+
+#parsed
+
+#lambda-display-expr(parsed)
