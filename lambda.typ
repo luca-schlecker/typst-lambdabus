@@ -132,6 +132,45 @@
   }
 }
 
+#let lambda-alpha-conversion-impl(expr, old-param-name, new-param-name) = {
+  if expr.type == "abstraction" {
+    if expr.param == old-param-name {
+      return expr
+    } else {
+      expr.body = lambda-alpha-conversion-impl(expr.body, old-param-name, new-param-name)
+      return expr
+    }
+  } else if expr.type == "application" {
+    expr.fn = lambda-alpha-conversion-impl(expr.fn, old-param-name, new-param-name)
+    expr.param = lambda-alpha-conversion-impl(expr.param, old-param-name, new-param-name)
+    return expr
+  } else if expr.type == "value" {
+    expr.name = expr.name.replace(old-param-name, new-param-name)
+    return expr
+  }
+}
+
+#let lambda-alpha-conversion(expr, new-param-name) = {
+  if type(new-param-name) != str {
+    panic("New parameter name has to be of type str")
+  }
+
+  lambda-parse-literal(input: new-param-name.codepoints())
+
+  if expr.type != "abstraction" {
+    panic("Can only apply λ-Calculus alpha-conversion on abstraction, got: '" + expr.type + "'")
+  }
+
+  if lambda-free-vars(expr).contains(new-param-name) {
+    panic("Cannot apply λ-Calculus alpha-conversion (new variable name '" + new-param-name + "' already bound): '" + repr(expr) + "'")
+  }
+
+  let old-param-name = expr.param
+  expr.param = new-param-name
+
+  return lambda-alpha-conversion-impl(expr, old-param-name, new-param-name)
+}
+
 #let lambda-display-expr(expr) = {
   if expr.type == "value" {
     expr.name
