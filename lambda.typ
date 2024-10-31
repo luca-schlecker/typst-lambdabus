@@ -229,6 +229,22 @@
   return lambda-beta-reduction-impl(expr.fn.body, expr.fn.param, expr.param)
 }
 
+#let lambda-eta-reduction(expr) = {
+  if expr.type != "abstraction" {
+    panic("Can only apply λ-Calculus eta-reduction on abstractions, got: '" + expr.type + "'")
+  }
+
+  if expr.body.type != "application" {
+    panic("Can only apply λ-Calculus eta-reduction on abstractions with an application body, got: '" + expr.body.type + "'")
+  }
+
+  if expr.body.param.type != "value" or expr.body.param.name != expr.param {
+    panic("Can only apply λ-Calculus eta-reduction on abstractions with an application body with the abstraction variable on the right side, got: '" + expr.body.type + "'")
+  }
+
+  return expr.body.fn
+}
+
 #let lambda-display-expr(expr) = {
   if expr.type == "value" {
     expr.name
