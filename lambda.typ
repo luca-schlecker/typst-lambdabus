@@ -1,9 +1,9 @@
 
 #let lambda-parse-literal(input: array) = {
-  if input.first() not in ("λ", " ", ".", "\\", "(") {
+  if input.first() not in ("λ", " ", ".", "\\", "(") and input.len() == 1 {
     return (type: "value", name: input.first())
   } else {
-    assert(false)
+    panic("Not a valid λ-Calculus Literal: '" + input.first() + "'")
   }
 }
 
@@ -15,14 +15,16 @@
   )
 
   if input.remove(0) not in ("λ", "\\") {
-    assert(false)
+    panic("Not a valid λ-Calculus Abstraction (needs to begin with λ or \\): '" + input.join() + "'")
   }
 
   let char = input.remove(0)
   if char not in ("λ", " ", ".", "\\") {
     result.param = char
+  } else if char == "." {
+    panic("Not a valid λ-Calculus Abstraction (missing parameter): '" + "λ" + char + input.join() + "'")
   } else {
-    assert(false)
+    panic("Not a valid λ-Calculus Abstraction (invalid parameter '" + char + "'): '" + input.join() + "'")
   }
 
   char = input.remove(0)
@@ -34,7 +36,7 @@
       parse-expr: parse-expr
     )
   } else {
-    assert(false)
+    panic("Not a valid λ-Calculus Abstraction (invalid parameter '" + char + "'): '" + input.join() + "'")
   }
 
   return result
@@ -56,7 +58,7 @@
   }
   
   if end == none {
-    assert(false)
+    panic("Not a valid λ-Calculus expression (missing closing parenthesis): '" + input.join() + "'")
   } else {
     return parse-expr(input.slice(1, end))
   }
@@ -83,7 +85,7 @@
 #let lambda-parse-application(input: array, parse-expr: function) = {
   let last-space = lambda-find-application-space(input: input)
   if last-space == none {
-    assert(false)
+    panic("Not a valid λ-Calculus application (missing space): '" + input.join() + "'")
   } else {
     let fn = parse-expr(input.slice(0, last-space))
     let param = parse-expr(input.slice(last-space + 1))
@@ -113,9 +115,9 @@
     } else if input.first() not in ("λ", " ", ".", "\\", "(") and input.len() == 1 {
       return lambda-parse-literal(input: input)
     } else {
-      assert(false)
+      panic("Not a valid λ-Calculus expression: '" + input.join() + "'")
     }
   } else {
-    assert(false)
+    panic("Only an array of strings and a string can be parsed as a λ-Calculus expression")
   }
 }
