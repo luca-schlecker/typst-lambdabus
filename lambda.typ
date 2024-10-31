@@ -192,6 +192,43 @@
   return lambda-alpha-conversion-impl(expr, old-param-name, new-param-name)
 }
 
+#let lambda-beta-reduction-impl(expr, old-param-name, new-value) = {
+  if expr.type == "value" {
+    if expr.name == old-param-name {
+      return new-value
+    } else {
+      return expr
+    }
+  } else if expr.type == "application" {
+    expr.fn = lambda-beta-reduction-impl(expr.fn, old-param-name, new-value)
+    expr.param = lambda-beta-reduction-impl(expr.param, old-param-name, new-value)
+    return expr
+  } else if expr.type == "abstraction" {
+    if expr.param == old-param-name {
+      return expr
+    } else {
+      if expr.param in lambda-free-vars(new-value) {
+        panic("Cannot apply λ-Calculus beta-reduction (free variable '" + expr.param + "' would be bound): '" + lambda-expr-to-str(expr) + "'")
+      } else {
+        expr.body = lambda-beta-reduction-impl(expr.body, old-param-name, new-value)
+        return expr
+      }
+    }
+  }
+}
+
+#let lambda-beta-reduction(expr) = {
+  if expr.type != "application" {
+    panic("Can only apply λ-Calculus beta-reduction on applications, got: '" + expr.type + "'")
+  }
+
+  if expr.fn.type != "abstraction" {
+    panic("Can only apply λ-Calculus beta-reduction on applications on abstractions, was: '" + expr.fn.type + "'")
+  }
+
+  return lambda-beta-reduction-impl(expr.fn.body, expr.fn.param, expr.param)
+}
+
 #let lambda-display-expr(expr) = {
   if expr.type == "value" {
     expr.name
