@@ -132,7 +132,8 @@
       }
     }
   } else if expr.type == "abstraction" {
-    return normalize-reduce(expr.body)
+    expr.body = normalize-reduce(expr.body)
+    return expr
   }
 }
 
