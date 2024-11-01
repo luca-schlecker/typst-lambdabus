@@ -1,7 +1,7 @@
-#import "lambda.typ": *
+#import "lib.typ" as lmd
 
-#let parsed = lambda-parse-expr("λx.(y z)")
+#let norm = lmd.normalize("(λx.x x) y")
 
-#parsed
+#norm
 
-#lambda-display-expr(parsed)
+#lmd.display(norm)
