@@ -20,6 +20,11 @@
   return lambda.normalize(expr)
 }
 
+#let normalization-steps(expr) = {
+  if type(expr) == str { expr = parse(expr) }
+  return lambda.normalization-steps(expr)
+}
+
 #let is-normalizable(expr) = {
   if type(expr) == str { expr = parse(expr) }
   return lambda.is-normalizable(expr)

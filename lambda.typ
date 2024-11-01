@@ -136,16 +136,20 @@
   }
 }
 
-#let normalize(expr) = {
-  let prev = (expr,)
+#let normalization-steps(expr) = {
+  let steps = (expr,)
   while normalize-is-reducable(expr) {
     expr = normalize-reduce(expr)
-    if expr in prev {
+    if expr in steps {
       panic("λ-Calculus expression not normalizable")
     }
-    prev.push(expr)
+    steps.push(expr)
   }
-  return expr
+  return steps
+}
+
+#let normalize(expr) = {
+  return normalization-steps(expr).last()
 }
 
 #let is-normalizable(expr) = {
