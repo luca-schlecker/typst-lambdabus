@@ -231,6 +231,56 @@
   return expr.body.fn
 }
 
+#let lambda-normalize-reducable(expr) = {
+  if expr.type == "value" {
+    return false
+  } else if expr.type == "application" {
+    if expr.fn.type == "abstraction" {
+      return true
+    } else {
+      return lambda-normalize-reducable(expr.fn) or lambda-normalize-reducable(expr.param)
+    }
+  } else if expr.type == "abstraction" {
+    return lambda-normalize-reducable(expr.body)
+  }
+}
+
+#let lambda-normalize-reduce(expr) = {
+  if expr.type == "value" {
+    return expr
+  } else if expr.type == "application" {
+    if expr.fn.type == "abstraction" {
+      return lambda-beta-reduction(expr)
+    } else {
+      if lambda-normalize-reducable(expr.fn) {
+        expr.fn = lambda-normalize-reduce(expr.fn)
+        return expr
+      } else {
+        expr.param = lambda-normalize-reduce(expr.param)
+        return expr
+      }
+    }
+  } else if expr.type == "abstraction" {
+    return lambda-normalize-reduce(expr.body)
+  }
+}
+
+#let lambda-normalize(expr) = {
+  let prev = (expr,)
+  while lambda-normalize-reducable(expr) {
+    expr = lambda-normalize-reduce(expr)
+    if expr in prev {
+      panic("λ-Calculus expression not normalizable")
+    }
+    prev.push(expr)
+  }
+  return expr
+}
+
+#let lambda-is-normalform(expr) = {
+  lambda-normalize(expr) == expr
+}
+
 #let lambda-display-expr(expr) = {
   if expr.type == "value" {
     expr.name
