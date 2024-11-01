@@ -24,7 +24,10 @@
   highlight,
   bound-ranks: (:),
   depth: 0,
+  implicit-parenthesis: false,
 ) = {
+  let display(expr, bound-ranks, depth) = display-expr(expr, highlight, bound-ranks: bound-ranks, depth: depth, implicit-parenthesis: implicit-parenthesis)
+
   if expr.type == "value" {
     if expr.name in bound-ranks {
       highlight(expr.name, bound-ranks.at(expr.name))
@@ -32,21 +35,32 @@
       expr.name
     }
   } else if expr.type == "application" {
-    let left = if expr.fn.type == "abstraction" {
-      [(] + display-expr(expr.fn, highlight, bound-ranks: bound-ranks, depth: depth) + [)]
+    if implicit-parenthesis {
+      text(fill: gray)[(] + [#display(expr.fn, bound-ranks, depth) #display(expr.param, bound-ranks, depth)] + text(fill: gray)[)]
     } else {
-      display-expr(expr.fn, highlight, bound-ranks: bound-ranks, depth: depth)
-    }
+      let left = if expr.fn.type == "abstraction" {
+        [(] + display(expr.fn, bound-ranks, depth) + [)]
+      } else {
+        display(expr.fn, bound-ranks, depth)
+      }
 
-    let right = if expr.param.type in ("application", "abstraction") {
-      [(] + display-expr(expr.param, highlight, bound-ranks: bound-ranks, depth: depth) + [)]
-    } else {
-      display-expr(expr.param, highlight, bound-ranks: bound-ranks, depth: depth)
+      let right = if expr.param.type in ("application", "abstraction") {
+        [(] + display(expr.param, bound-ranks, depth) + [)]
+      } else {
+        display(expr.param, bound-ranks, depth)
+      }
+
+      [#left #right]
     }
     
-    [#left #right]
   } else if expr.type == "abstraction" {
     bound-ranks.insert(expr.param, depth)
-    [λ] + highlight(expr.param, bound-ranks.at(expr.param)) + [.] + display-expr(expr.body, highlight, bound-ranks: bound-ranks, depth: depth + 1)
+    let content = [λ] + highlight(expr.param, bound-ranks.at(expr.param)) + [.] + display(expr.body, bound-ranks, depth + 1)
+
+    if implicit-parenthesis {
+      text(fill: gray)[(] + content + text(fill: gray)[)]
+    } else {
+      content
+    }
   }
 }

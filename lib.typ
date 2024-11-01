@@ -60,6 +60,7 @@
   show-bound: false,
   colors: (red, green, blue, yellow, orange, black, fuchsia).map(it => it.transparentize(80%)),
   highlight-bound: none,
+  implicit-parenthesis: false,
 ) = {
   let h = if show-bound {
     if highlight-bound == none {
@@ -77,5 +78,5 @@
   }
 
   if type(expr) == str { expr = parse(expr) }
-  return printing.display-expr(expr, h)
+  return printing.display-expr(expr, h, implicit-parenthesis: implicit-parenthesis)
 }
