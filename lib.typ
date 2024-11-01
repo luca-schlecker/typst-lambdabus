@@ -4,7 +4,7 @@
 
 #let parse(input) = {
   if type(input) == str {
-    return parsing.parse-expr(input.codepoints())
+    return lambda.tag(parsing.parse-expr(input.codepoints()))
   } else {
     panic("Only a string can be parsed as a λ-Calculus expression")
   }
@@ -78,5 +78,5 @@
   }
 
   if type(expr) == str { expr = parse(expr) }
-  return printing.display-expr(expr, h, implicit-parenthesis: implicit-parenthesis)
+  return printing.display-expr(expr, h, implicit-parenthesis)
 }

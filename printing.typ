@@ -22,43 +22,41 @@
 #let display-expr(
   expr,
   highlight,
-  bound-ranks: (:),
-  depth: 0,
-  implicit-parenthesis: false,
+  implicit-parenthesis,
 ) = {
-  let display(expr, bound-ranks, depth) = display-expr(expr, highlight, bound-ranks: bound-ranks, depth: depth, implicit-parenthesis: implicit-parenthesis)
+  let display(expr) = display-expr(expr, highlight, implicit-parenthesis)
+  let par(content, ..fill) = text(..fill)[(] + content + text(..fill)[)]
 
   if expr.type == "value" {
-    if expr.name in bound-ranks {
-      highlight(expr.name, bound-ranks.at(expr.name))
+    if "index" in expr {
+      highlight(expr.name, expr.index)
     } else {
       expr.name
     }
   } else if expr.type == "application" {
     if implicit-parenthesis {
-      text(fill: gray)[(] + [#display(expr.fn, bound-ranks, depth) #display(expr.param, bound-ranks, depth)] + text(fill: gray)[)]
+      par(fill: gray)[#display(expr.fn) #display(expr.param)]
     } else {
       let left = if expr.fn.type == "abstraction" {
-        [(] + display(expr.fn, bound-ranks, depth) + [)]
+        par(display(expr.fn))
       } else {
-        display(expr.fn, bound-ranks, depth)
+        display(expr.fn)
       }
 
       let right = if expr.param.type in ("application", "abstraction") {
-        [(] + display(expr.param, bound-ranks, depth) + [)]
+        par(display(expr.param))
       } else {
-        display(expr.param, bound-ranks, depth)
+        display(expr.param)
       }
 
       [#left #right]
     }
     
   } else if expr.type == "abstraction" {
-    bound-ranks.insert(expr.param, depth)
-    let content = [λ] + highlight(expr.param, bound-ranks.at(expr.param)) + [.] + display(expr.body, bound-ranks, depth + 1)
+    let content = [λ] + highlight(expr.param, expr.index) + [.] + display(expr.body)
 
     if implicit-parenthesis {
-      text(fill: gray)[(] + content + text(fill: gray)[)]
+      par(content, fill: gray)
     } else {
       content
     }

@@ -172,3 +172,46 @@
     return false
   }
 }
+
+#let count-binds(expr) = {
+  if expr.type == "application" {
+    return count-binds(expr.fn) + count-binds(expr.param)
+  } else if expr.type == "abstraction" {
+    return 1 + count-binds(expr.body)
+  } else if expr.type == "value" {
+    return 0
+  }
+}
+
+#let tag(
+  expr,
+  bound-ranks: (:),
+  index: 0,
+) = {
+  let _tag(expr, bound-ranks, index) = tag(
+    expr,
+    bound-ranks: bound-ranks,
+    index: index,
+  )
+
+  if expr.type == "value" {
+    if expr.name in bound-ranks {
+      expr.insert("index", bound-ranks.at(expr.name))
+    }
+
+    return expr
+  } else if expr.type == "application" {
+    expr.fn = _tag(expr.fn, bound-ranks, index)
+    expr.param = _tag(expr.param, bound-ranks, index + count-binds(expr.fn))
+
+    return expr
+  } else if expr.type == "abstraction" {
+    bound-ranks.insert(expr.param, index)
+    expr.insert("index", index)
+    expr.body = _tag(expr.body, bound-ranks, index + 1)
+
+    return expr
+  } else {
+    panic("Not a valid λ-Calculus type: '" + expr.type + "'")
+  }
+}
