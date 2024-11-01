@@ -277,8 +277,24 @@
   return expr
 }
 
+#let lambda-is-normalizable(expr) = {
+  let prev = (expr,)
+  while lambda-normalize-reducable(expr) {
+    expr = lambda-normalize-reduce(expr)
+    if expr in prev {
+      return false
+    }
+    prev.push(expr)
+  }
+  return true
+}
+
 #let lambda-is-normalform(expr) = {
-  lambda-normalize(expr) == expr
+  if lambda-is-normalizable(expr) {
+    return lambda-normalize(expr) == expr
+  } else {
+    return false
+  }
 }
 
 #let lambda-display-expr(expr) = {
