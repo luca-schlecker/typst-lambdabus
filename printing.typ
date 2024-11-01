@@ -19,23 +19,34 @@
   }
 }
 
-#let display-expr(expr) = {
+#let display-expr(
+  expr,
+  highlight,
+  bound-ranks: (:),
+  depth: 0,
+) = {
   if expr.type == "value" {
-    expr.name
+    if expr.name in bound-ranks {
+      highlight(expr.name, bound-ranks.at(expr.name))
+    } else {
+      expr.name
+    }
   } else if expr.type == "application" {
     let left = if expr.fn.type == "abstraction" {
-      [(] + display-expr(expr.fn) + [)]
+      [(] + display-expr(expr.fn, highlight, bound-ranks: bound-ranks, depth: depth) + [)]
     } else {
-      display-expr(expr.fn)
+      display-expr(expr.fn, highlight, bound-ranks: bound-ranks, depth: depth)
     }
+
     let right = if expr.param.type in ("application", "abstraction") {
-      [(] + display-expr(expr.param) + [)]
+      [(] + display-expr(expr.param, highlight, bound-ranks: bound-ranks, depth: depth) + [)]
     } else {
-      display-expr(expr.param)
+      display-expr(expr.param, highlight, bound-ranks: bound-ranks, depth: depth)
     }
     
     [#left #right]
   } else if expr.type == "abstraction" {
-    [λ] + expr.param + [.] + display-expr(expr.body)
+    bound-ranks.insert(expr.param, depth)
+    [λ] + highlight(expr.param, bound-ranks.at(expr.param)) + [.] + display-expr(expr.body, highlight, bound-ranks: bound-ranks, depth: depth + 1)
   }
 }

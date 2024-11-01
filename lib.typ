@@ -50,7 +50,27 @@
   return printing.expr-to-str(expr)
 }
 
-#let display(expr) = {
+#let display(
+  expr,
+  show-bound: false,
+  colors: (red, green, blue, yellow, orange, black, fuchsia).map(it => it.transparentize(80%)),
+  highlight-bound: none,
+) = {
+  let h = if show-bound {
+    if highlight-bound == none {
+      (var, rank) => highlight(
+        var,
+        fill: colors.at(calc.rem(rank, colors.len())),
+        radius: 0.2em,
+        extent: 0.05em
+      )
+    } else {
+      highlight-bound
+    }
+  } else {
+    (var, rank) => var
+  }
+
   if type(expr) == str { expr = parse(expr) }
-  return printing.display-expr(expr)
+  return printing.display-expr(expr, h)
 }
