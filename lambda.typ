@@ -1,4 +1,5 @@
 #import "printing.typ": expr-to-str
+#import "parsing.typ": parse-literal
 
 #let free-vars(expr) = {
   if expr.type == "value" {
