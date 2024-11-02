@@ -156,7 +156,7 @@
 
 #let is-normalizable(expr) = {
   let prev = (expr,)
-  while normalize-reducable(expr) {
+  while normalize-is-reducable(expr) {
     expr = normalize-reduce(expr)
     if expr in prev {
       return false
